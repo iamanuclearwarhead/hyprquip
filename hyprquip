@@ -1,0 +1,120 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+VERSION=0.1.0
+
+usage() {
+    cat <<EOF
+hyprquip $VERSION
+print one of hyprland's official splash texts
+
+usage: hyprquip [mode] [options]
+
+modes:
+  (none)          random splash, using hyprland's holiday rules
+  -s, --session   the splash hyprland picked for this session (hyprctl splash)
+  -d, --daily     the same splash all day
+  -a, --all       every splash in the chosen list
+  -c, --count     number of splashes in the chosen list
+
+options:
+  -l, --list NAME   normal, christmas or newyear (default: picked by date)
+  -j, --json        output json for waybar custom modules
+  -h, --help        show this help
+  -v, --version     show the version
+
+env:
+  HYPRQUIP_DATA   directory holding the splash lists
+  HYPRQUIP_DATE   pretend today is this date (YYYY-MM-DD)
+EOF
+}
+
+find_data() {
+    local here
+    here=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
+    for d in "${HYPRQUIP_DATA:-}" "$here/data" "$here/../share/hyprquip/data" \
+        "${XDG_DATA_HOME:-$HOME/.local/share}/hyprquip/data" /usr/local/share/hyprquip/data /usr/share/hyprquip/data; do
+        [[ -n $d && -f $d/splashes.txt ]] && { echo "$d"; return; }
+    done
+    echo "hyprquip: splash lists not found, set HYPRQUIP_DATA" >&2
+    exit 1
+}
+
+today() {
+    date -d "${HYPRQUIP_DATE:-now}" "+$1"
+}
+
+pick_list() {
+    local month day
+    month=$((10#$(today %m)))
+    day=$((10#$(today %d)))
+    if (( (month == 12 && day >= 29) || (month == 1 && day <= 3) )); then
+        echo newyear
+    elif (( month == 12 && day >= 23 && day <= 27 )); then
+        echo christmas
+    else
+        echo normal
+    fi
+}
+
+load() {
+    local file year
+    case $1 in
+        normal) file=splashes.txt ;;
+        christmas) file=christmas.txt ;;
+        newyear) file=newyear.txt ;;
+        *) echo "hyprquip: unknown list '$1'" >&2; exit 2 ;;
+    esac
+    year=$((10#$(today %Y)))
+    (( 10#$(today %m) > 8 )) && year=$((year + 1))
+    sed -e "s/{year}/$year/g" -e "s/{lastyear}/$((year - 1))/g" "$DATA/$file"
+}
+
+emit() {
+    if (( JSON )); then
+        local esc=${1//\\/\\\\}
+        esc=${esc//\"/\\\"}
+        printf '{"text": "%s", "tooltip": "%s", "class": "hyprquip"}\n' "$esc" "$esc"
+    else
+        printf '%s\n' "$1"
+    fi
+}
+
+MODE=random
+LIST=
+JSON=0
+while (( $# )); do
+    case $1 in
+        -s|--session) MODE=session ;;
+        -d|--daily) MODE=daily ;;
+        -a|--all) MODE=all ;;
+        -c|--count) MODE=count ;;
+        -l|--list) LIST=${2:?--list needs a name}; shift ;;
+        --list=*) LIST=${1#*=} ;;
+        -j|--json) JSON=1 ;;
+        -h|--help) usage; exit 0 ;;
+        -v|--version) echo "hyprquip $VERSION"; exit 0 ;;
+        *) echo "hyprquip: unknown option '$1'" >&2; usage >&2; exit 2 ;;
+    esac
+    shift
+done
+
+DATA=$(find_data)
+LIST=${LIST:-$(pick_list)}
+mapfile -t SPLASHES < <(load "$LIST")
+
+case $MODE in
+    all) printf '%s\n' "${SPLASHES[@]}" ;;
+    count) echo "${#SPLASHES[@]}" ;;
+    daily)
+        seed=$(today %Y%m%d | cksum | cut -d' ' -f1)
+        emit "${SPLASHES[seed % ${#SPLASHES[@]}]}"
+        ;;
+    session)
+        s=
+        [[ -n ${HYPRLAND_INSTANCE_SIGNATURE:-} ]] && command -v hyprctl >/dev/null && s=$(hyprctl splash 2>/dev/null || true)
+        [[ -z $s || $s == *"unknown request"* ]] && s=${SPLASHES[RANDOM % ${#SPLASHES[@]}]}
+        emit "$s"
+        ;;
+    random) emit "${SPLASHES[RANDOM % ${#SPLASHES[@]}]}" ;;
+esac

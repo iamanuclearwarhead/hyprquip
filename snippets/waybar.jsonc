@@ -1,0 +1,6 @@
+"custom/hyprquip": {
+    "exec": "hyprquip --daily --json",
+    "return-type": "json",
+    "interval": 3600,
+    "max-length": 80
+}

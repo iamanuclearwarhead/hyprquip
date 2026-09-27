@@ -1,0 +1,13 @@
+[Unit]
+Description=hyprland splash texts on the desktop
+PartOf=graphical-session.target
+After=graphical-session.target
+Requisite=graphical-session.target
+
+[Service]
+ExecStart=/usr/bin/qs -p /usr/share/hyprquip/quickshell
+Restart=on-failure
+RestartSec=2
+
+[Install]
+WantedBy=graphical-session.target

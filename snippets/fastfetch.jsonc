@@ -1,0 +1,5 @@
+{
+    "type": "command",
+    "key": "splash",
+    "text": "hyprquip --session"
+}

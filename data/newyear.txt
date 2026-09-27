@@ -1,0 +1,6 @@
+Happy new Year!
+[New year] will be the year of the Linux desktop!
+[New year] will be the year of the Hyprland desktop!
+{year} will be the year of the Linux desktop!
+{year} will be the year of the Hyprland desktop!
+Let's make {year} even better than {lastyear}!
