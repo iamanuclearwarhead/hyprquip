@@ -91,6 +91,7 @@ install -Dm755 hyprquip "$DESTDIR$SHARE/hyprquip"
 install -Dm644 -t "$DESTDIR$SHARE/data" data/*.txt data/LICENSE.hyprland
 install -Dm644 -t "$DESTDIR$SHARE/quickshell" quickshell/shell.qml
 install -Dm644 -t "$DESTDIR$SHARE/snippets" snippets/*
+sed -i "s|~/.local/share/hyprquip|$SHARE|g" "$DESTDIR$SHARE"/snippets/*
 install -Dm644 config.example.json "$DESTDIR$SHARE/config.example.json"
 install -d "$DESTDIR$BIN"
 ln -sf "$SHARE/hyprquip" "$DESTDIR$BIN/hyprquip"
