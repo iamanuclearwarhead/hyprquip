@@ -11,7 +11,7 @@ print one of hyprland's official splash texts
 usage: hyprquip [mode] [options]
 
 modes:
-  (none)          random splash, using hyprland's holiday rules
+  -r, --random    random splash, using hyprland's holiday rules (default)
   -s, --session   the splash hyprland picked for this session (hyprctl splash)
   -d, --daily     the same splash all day
   -a, --all       every splash in the chosen list
@@ -85,6 +85,7 @@ LIST=
 JSON=0
 while (( $# )); do
     case $1 in
+        -r|--random) MODE=random ;;
         -s|--session) MODE=session ;;
         -d|--daily) MODE=daily ;;
         -a|--all) MODE=all ;;

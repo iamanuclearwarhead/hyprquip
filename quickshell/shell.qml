@@ -21,6 +21,7 @@ ShellRoot {
 
     property string hyprFont: "Sans"
     property string splash: ""
+    property string day: Qt.formatDate(new Date(), "yyyy-MM-dd")
     property var scheme: null
 
     readonly property color textColor: {
@@ -44,7 +45,10 @@ ShellRoot {
             }
             fetch.running = true;
         }
-        onLoadFailed: root.cfg = {}
+        onLoadFailed: {
+            root.cfg = {};
+            fetch.running = true;
+        }
     }
 
     FileView {
@@ -79,7 +83,6 @@ ShellRoot {
 
     Process {
         id: fetch
-        running: true
         command: [Quickshell.shellDir + "/../hyprquip", "--" + root.mode]
         stdout: StdioCollector {
             onStreamFinished: {
@@ -95,6 +98,19 @@ ShellRoot {
         repeat: true
         interval: root.refreshMinutes * 60000
         onTriggered: fetch.running = true
+    }
+
+    Timer {
+        running: root.mode !== "session"
+        repeat: true
+        interval: 60000
+        onTriggered: {
+            const today = Qt.formatDate(new Date(), "yyyy-MM-dd");
+            if (today !== root.day) {
+                root.day = today;
+                fetch.running = true;
+            }
+        }
     }
 
     Variants {
