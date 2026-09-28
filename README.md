@@ -1,27 +1,31 @@
 # hyprquip
 
-hyprland's official splash texts, anywhere.
+hyprlands official splash texts, anywhere
 
-hyprland draws a little splash line at the bottom of its default wallpaper ("it's not awesome, it's hyprland!", "i use arch, btw", and friends). as soon as a shell like caelestia or serpantinum puts its own wallpaper on top, the splash is gone. hyprquip brings it back, and also lets you drop splashes into hyprlock, waybar, fastfetch or your terminal.
+hyprland puts a little splash text at the bottom of its default wallpaper, but once a shell like caelestia or serpantinum draws its own wallpaper you never see it again. hyprquip brings it back on your desktop, and can also put it in hyprlock, waybar, fastfetch or your terminal
 
-the splash list is the one in hyprland's source (`src/helpers/Splashes.hpp`), including the christmas and new year lists, with the same date rules hyprland uses.
+![screenshot](docs/screenshot.jpg)
 
-## what you get
+![closeup](docs/closeup.jpg)
 
-- **desktop splash**: a tiny quickshell overlay that sits on top of your wallpaper and below your windows, placed and sized exactly like hyprland's own (font size is monitor height / 76, text ends at 98% of the screen height). clicks go straight through it. it works next to caelestia, serpantinum, or any other shell, and does not patch them.
-- **readable on any wallpaper**: hyprquip checks how bright your wallpaper is behind the text and picks dark text with a light halo or light text with a dark halo. with caelestia it uses your scheme colors and follows wallpaper changes. set `"tone": "light", "shadow": false, "opacity": 0.333` for hyprland's exact look.
-- **cli**: `hyprquip` prints a splash for scripts, status bars, lock screens and greetings.
-- **snippets**: ready-made configs for hyprlock, waybar, fastfetch, fish, bash/zsh and a caelestia toast.
+## features
+
+- same splash list as hyprland (`src/helpers/Splashes.hpp`), christmas and new year ones included
+- sits on top of your wallpaper and under your windows, same size and spot as hyprland draws it
+- works next to any shell, doesnt patch anything
+- picks dark or light text depending on how bright your wallpaper is
+- uses your caelestia colours if you have caelestia
+- cli for scripts, bars, lock screens and greetings
 
 ## install
 
-### aur
+### arch
 
 ```sh
 yay -S hyprquip-git
 ```
 
-then turn on the desktop splash, either with systemd (if your session starts `graphical-session.target`, for example under uwsm):
+then start the desktop splash with systemd:
 
 ```sh
 systemctl --user enable --now hyprquip
@@ -30,12 +34,10 @@ systemctl --user enable --now hyprquip
 or from your hyprland config:
 
 ```lua
--- hyprland.lua
 hl.on("hyprland.start", function() hl.exec_cmd("qs -p /usr/share/hyprquip/quickshell") end)
 ```
 
 ```ini
-# hyprland.conf
 exec-once = qs -p /usr/share/hyprquip/quickshell
 ```
 
@@ -47,126 +49,54 @@ cd hyprquip
 ./install.sh
 ```
 
-this installs to `~/.local` and asks whether to show the splash on your desktop. if you use caelestia it adds one autostart line to `~/.config/caelestia/hypr-user.lua`, otherwise to your `hyprland.lua` or `hyprland.conf`. with a systemd graphical session it enables the user service instead.
+installs to `~/.local` and adds the autostart for you. `--system` installs to `/usr`, `--uninstall` removes everything
 
-| option | what it does |
-| --- | --- |
-| `--system` | install to `/usr` (or `$PREFIX`) |
-| `--service` / `--no-service` | enable the desktop splash without asking, or skip it |
-| `--uninstall` | remove everything, including the autostart line |
+> the desktop splash needs [quickshell](https://quickshell.org), picking the text colour needs imagemagick. the cli only needs bash
 
-the desktop splash needs [quickshell](https://quickshell.org). the cli only needs bash and coreutils.
-
-## cli
+## usage
 
 ```
-hyprquip              random splash, holiday aware
-hyprquip --session    the splash hyprland picked for this session (hyprctl splash)
-hyprquip --daily      same splash all day
+hyprquip              random splash
+hyprquip --session    the one hyprland picked this session
+hyprquip --daily      same one all day
 hyprquip --all        every splash
-hyprquip --count      how many there are
-hyprquip --list christmas
 hyprquip --json       json for waybar
 ```
 
-`HYPRQUIP_DATE=2026-12-25 hyprquip` pretends it is christmas. `HYPRQUIP_DATA` points at a different folder of splash lists.
+`HYPRQUIP_DATE=2026-12-25 hyprquip` pretends its christmas
 
-## desktop splash config
+## config
 
-optional, at `~/.config/hyprquip/config.json`. changes apply live. `tone: auto` needs imagemagick.
+`~/.config/hyprquip/config.json`, changes apply live
 
 ```json
 {
     "mode": "session",
-    "refreshMinutes": 0,
-    "color": "auto",
     "tone": "auto",
     "opacity": 0.85,
-    "shadow": true,
-    "font": "Sans",
-    "sizeDivisor": 76,
-    "bottom": 0.02
+    "shadow": true
 }
 ```
 
-| key | meaning |
-| --- | --- |
-| `mode` | `session` (matches hyprland), `daily` or `random` |
-| `refreshMinutes` | pick a new splash every n minutes, `0` keeps one |
-| `color` | `auto` (picked from `tone`) or any color like `#55ffffff` |
-| `tone` | `auto` (from wallpaper brightness), `light` or `dark` text |
-| `opacity` | text opacity used by `auto` |
-| `shadow` | soft halo behind the text for contrast |
-| `shadowColor` | halo color, defaults to the opposite of the text |
-| `wallpaper` | wallpaper path for `tone: auto`, caelestia's is found on its own |
-| `font` | font family, defaults to hyprland's `misc:splash_font_family` |
-| `sizeDivisor` | font size is screen height divided by this |
-| `bottom` | gap under the text as a fraction of screen height |
+- `mode` session, daily or random
+- `refreshMinutes` pick a new one every n minutes, 0 to never
+- `tone` auto, light or dark text
+- `color` any colour like `#55ffffff` instead of auto
+- `opacity`, `shadow`, `shadowColor`, `font`, `sizeDivisor`, `bottom` for the rest
+- `wallpaper` wallpaper path for auto tone if you dont use caelestia
+
+for the exact hyprland look use `{ "tone": "light", "shadow": false, "opacity": 0.333 }`
 
 ## snippets
 
-all of these live in `share/hyprquip/snippets` after installing.
+theres ready made configs for hyprlock, waybar, fastfetch, fish, bash/zsh and a caelestia toast in [snippets](snippets)
 
-**hyprlock**
-
-```ini
-label {
-    monitor =
-    text = cmd[update:0] hyprquip --session
-    color = rgba(255, 255, 255, 0.33)
-    font_size = 14
-    position = 0, 20
-    halign = center
-    valign = bottom
-}
-```
-
-**waybar**
-
-```jsonc
-"custom/hyprquip": {
-    "exec": "hyprquip --daily --json",
-    "return-type": "json",
-    "interval": 3600,
-    "max-length": 80
-}
-```
-
-**fastfetch**
-
-```jsonc
-{ "type": "command", "key": "splash", "text": "hyprquip --session" }
-```
-
-**fish**
-
-```fish
-function fish_greeting
-    hyprquip
-end
-```
-
-**bash / zsh**
+## updating the splashes
 
 ```sh
-command -v hyprquip >/dev/null && hyprquip
+./tools/update-splashes.py
 ```
 
-**caelestia toast**
+## license
 
-```sh
-caelestia shell toaster info hyprland "$(hyprquip --session)" auto_awesome
-```
-
-## updating the splash list
-
-```sh
-./tools/update-splashes.py          # from hyprland main
-./tools/update-splashes.py v0.56.2  # from a tag
-```
-
-## credits
-
-the splash texts are written by the hyprland project and its community, copyright (c) 2022-2026 vaxerski, under the bsd 3-clause license. see `data/LICENSE.hyprland`. hyprquip is not affiliated with or endorsed by hyprland.
-
-hyprquip itself is bsd 3-clause too, see `LICENSE`.
+bsd 3-clause, see [license](LICENSE) here. the splash texts belong to hyprland and vaxerski, also bsd 3-clause, see [data/LICENSE.hyprland](data/LICENSE.hyprland). not affiliated with hyprland
