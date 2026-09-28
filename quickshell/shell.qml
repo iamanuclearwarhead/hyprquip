@@ -38,7 +38,13 @@ ShellRoot {
     readonly property color textColor: colorSetting !== "auto" ? colorSetting : Qt.alpha(darkText ? darkColor : lightColor, opacityAuto)
     readonly property color shadowColor: cfg.shadowColor ?? (darkText ? lightColor : darkColor)
 
-    onWallpaperChanged: probe.running = true
+    onWallpaperChanged: {
+        probe.running = false;
+        if (!wallpaper)
+            return;
+        probe.command = ["sh", "-c", "[ -f \"$1\" ] && magick \"$1[0]\" -resize '1920x1080^' -gravity center -extent 1920x1080 -gravity south -crop 50%x6%+0+0 -colorspace gray -format '%[fx:mean]' info: 2>/dev/null", "sh", wallpaper];
+        probe.running = true;
+    }
 
     FileView {
         path: root.stateHome + "/caelestia/wallpaper/path.txt"
@@ -50,7 +56,6 @@ ShellRoot {
 
     Process {
         id: probe
-        command: ["sh", "-c", "[ -f \"$1\" ] && magick \"$1[0]\" -resize '1920x1080^' -gravity center -extent 1920x1080 -gravity south -crop 50%x6%+0+0 -colorspace gray -format '%[fx:mean]' info: 2>/dev/null", "sh", root.wallpaper]
         stdout: StdioCollector {
             onStreamFinished: {
                 const v = parseFloat(text);
