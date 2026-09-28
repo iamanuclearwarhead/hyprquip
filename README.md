@@ -9,7 +9,7 @@ the splash list is the one in hyprland's source (`src/helpers/Splashes.hpp`), in
 ## what you get
 
 - **desktop splash**: a tiny quickshell overlay that sits on top of your wallpaper and below your windows, placed and sized exactly like hyprland's own (font size is monitor height / 76, text ends at 98% of the screen height). clicks go straight through it. it works next to caelestia, serpantinum, or any other shell, and does not patch them.
-- **caelestia colors**: if caelestia is installed, the splash takes its color from your current scheme and follows it when the wallpaper changes. otherwise it uses hyprland's default `col.splash` (white at 33%).
+- **readable on any wallpaper**: hyprquip checks how bright your wallpaper is behind the text and picks dark text with a light halo or light text with a dark halo. with caelestia it uses your scheme colors and follows wallpaper changes. set `"tone": "light", "shadow": false, "opacity": 0.333` for hyprland's exact look.
 - **cli**: `hyprquip` prints a splash for scripts, status bars, lock screens and greetings.
 - **snippets**: ready-made configs for hyprlock, waybar, fastfetch, fish, bash/zsh and a caelestia toast.
 
@@ -73,14 +73,16 @@ hyprquip --json       json for waybar
 
 ## desktop splash config
 
-optional, at `~/.config/hyprquip/config.json`. changes apply live.
+optional, at `~/.config/hyprquip/config.json`. changes apply live. `tone: auto` needs imagemagick.
 
 ```json
 {
     "mode": "session",
     "refreshMinutes": 0,
     "color": "auto",
-    "opacity": 0.333,
+    "tone": "auto",
+    "opacity": 0.85,
+    "shadow": true,
     "font": "Sans",
     "sizeDivisor": 76,
     "bottom": 0.02
@@ -91,8 +93,12 @@ optional, at `~/.config/hyprquip/config.json`. changes apply live.
 | --- | --- |
 | `mode` | `session` (matches hyprland), `daily` or `random` |
 | `refreshMinutes` | pick a new splash every n minutes, `0` keeps one |
-| `color` | `auto` (caelestia scheme or white) or any color like `#55ffffff` |
-| `opacity` | opacity used by `auto` |
+| `color` | `auto` (picked from `tone`) or any color like `#55ffffff` |
+| `tone` | `auto` (from wallpaper brightness), `light` or `dark` text |
+| `opacity` | text opacity used by `auto` |
+| `shadow` | soft halo behind the text for contrast |
+| `shadowColor` | halo color, defaults to the opposite of the text |
+| `wallpaper` | wallpaper path for `tone: auto`, caelestia's is found on its own |
 | `font` | font family, defaults to hyprland's `misc:splash_font_family` |
 | `sizeDivisor` | font size is screen height divided by this |
 | `bottom` | gap under the text as a fraction of screen height |

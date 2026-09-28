@@ -2,7 +2,9 @@
     "mode": "session",
     "refreshMinutes": 0,
     "color": "auto",
-    "opacity": 0.333,
+    "tone": "auto",
+    "opacity": 0.85,
+    "shadow": true,
     "font": "Sans",
     "sizeDivisor": 76,
     "bottom": 0.02

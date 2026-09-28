@@ -8,6 +8,7 @@ url="https://github.com/iamanuclearwarhead/hyprquip"
 license=('BSD-3-Clause')
 depends=('bash' 'coreutils' 'sed')
 optdepends=('quickshell: splash on the desktop'
+            'imagemagick: pick text tone from wallpaper brightness'
             'hyprland: hyprquip --session reads the splash hyprland picked')
 makedepends=('git')
 provides=('hyprquip')
